@@ -1,4 +1,4 @@
-# Main Folder Notes:
+# Folder Notes:
 This folder includes the main code of fast-TDA (ellipse fitting) and the data from the PCB shock test.
 The data include the excitation signal (impact), imposed by the shaker and two acquired signals from the base plate and the main PCB.
 

@@ -3,8 +3,11 @@ Repository for the 2026 SMASIS paper "FPGA-deployable Approximate Topological Fr
 This repo includes three main folders:
 
 1- HLS: includes the main code for the FPGA.
+
 2- code: includes the MATLAB code for the Fast-TDA algorithm, along with the video clip of the ellipse fitting process over time.
+
 3- Mathematics: includes the mathematical derivation of the Fast TDA in detail.
+
 4- media: includes the GitHub address related to this paper.
 
 

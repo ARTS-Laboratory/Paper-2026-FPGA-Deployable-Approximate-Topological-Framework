@@ -10,9 +10,9 @@
 % read data
 clear all;
 close all;
-data = readtable('processed_clean.csv');
+data = readtable('data.csv');
 time = data.Time_s;
-output = data.Acc1_filt;
+output = data.Output;
 fprintf('Data loaded: %d rows\n', length(time));
 
 % find the sample rate

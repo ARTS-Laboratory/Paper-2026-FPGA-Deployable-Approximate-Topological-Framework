@@ -4,9 +4,9 @@ This repo includes three main folders:
 
 1- HLS: includes the main code for the FPGA.
 
-2- code: includes the MATLAB code for the Fast-TDA algorithm, along with the video clip of the ellipse fitting process over time.
+2- code: includes the MATLAB code for the Fast-TDA algorithm, data, and a video clip of the ellipse fitting process over time.
 
-3- Mathematics: includes the mathematical derivation of the Fast TDA in detail ( the last updated file name is Fast_TDA.tex)
+3- Mathematics: includes the mathematical derivation of the Fast TDA in detail.
 
 4- media: includes the GitHub address related to this paper.
 

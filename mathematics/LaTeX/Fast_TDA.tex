@@ -1,0 +1,869 @@
+\documentclass{article}
+\usepackage{amsmath, amssymb, bm, array, booktabs, geometry}
+\geometry{margin=1in}
+
+\title{Mathematical Derivations of Fast Topological Data Analysis\\
+	(Ellipse Fitting via Takens Embedding)}
+\author{}
+\date{}
+
+\begin{document}
+	\maketitle
+	\tableofcontents
+	\newpage
+	
+	% ============================================================
+	\section{Spectral Analysis and TDA Parameter Selection}
+	% ============================================================
+	
+	\textbf{Goal:} Extract two key frequencies from the signal ---
+	$F_{\max}$ (dominant oscillation) and $F_{\min}$ (lowest
+	significant frequency) --- which control the time delay
+	and window size used in all subsequent steps.
+	Transforming the signal from the time domain into
+	the frequency domain using the DFT, then locate peaks in the
+	resulting amplitude spectrum.
+	
+	\subsection{Discrete Fourier Transform}
+	
+	The DFT decomposes the time-domain signal $x(n)$ into its
+	sinusoidal frequency components.
+	Each coefficient $Y(k)$ tells us how much energy the signal
+	has at frequency $f(k) = k \cdot F_s/N$ Hz.
+	Given a discrete time series $x(n)$ of length $N$:
+	
+	\begin{equation}
+		Y(k) = \sum_{n=0}^{N-1} x(n)\, e^{-j2\pi kn/N},
+		\qquad k = 0, 1, \ldots, N-1
+	\end{equation}
+	
+	Because the input is real-valued, the DFT is symmetric and
+	only the first half carries unique information.
+	Dividing by $N$ normalises the amplitude so it is independent
+	of signal length, and doubling the interior bins preserves
+	total energy in the single-sided representation:
+	
+	\begin{equation}
+		|Y_{\text{single}}(k)| =
+		\begin{cases}
+			\dfrac{|Y(k)|}{N}    & k = 0 \text{ (DC)} \\[6pt]
+			\dfrac{2\,|Y(k)|}{N} & k = 1, \ldots, \lfloor N/2 \rfloor - 1 \\[6pt]
+			\dfrac{|Y(k)|}{N}    & k = N/2 \text{ (Nyquist, even } N \text{ only)}
+		\end{cases}
+	\end{equation}
+	
+	The corresponding frequency axis (Hz) is:
+	
+	\begin{equation}
+		f(k) = k \cdot \frac{F_s}{N},
+		\qquad k = 0, 1, \ldots, \lfloor N/2 \rfloor
+	\end{equation}
+	
+	where $F_s = 1/\Delta t$ is the sampling frequency.
+	
+	\subsection{Peak Frequency Detection}
+	
+	Two characteristic frequencies are extracted from the spectrum.
+	$F_{\max}$ is the dominant oscillation frequency.
+	$F_{\min}$ is the lowest frequency with a peak prominence above
+	10\% of the maximum magnitude, ensuring noise bumps are ignored:
+	
+	\begin{align}
+		F_{\max} &= \text{frequency at absolute spectral peak} \\[4pt]
+		F_{\min} &= \text{lowest peak with prominence} > 10\%
+		\text{ of } \max|Y_{\text{single}}|
+	\end{align}
+	
+	\subsection{TDA Time Delay and Window Duration}
+	
+	\textbf{Goal:} Translate $F_{\max}$ and $F_{\min}$ into
+	the two control parameters of the Takens embedding:
+	the time delay $\tau$ and the window duration $T_w$.
+	Applying the Razmarashooli method, which sets
+	$\tau$ to one quarter of the dominant period and $T_w$
+	to one full period of the lowest frequency.
+	
+	Following the Razmarashooli method, the time delay $\tau$ and
+	window duration $T_w$ are defined as:
+	
+	\begin{align}
+		\tau      &= \frac{0.25}{F_{\max}} \quad \text{(seconds)}
+		\label{eq:tau} \\[4pt]
+		\tau_s    &= \operatorname{round}\!\left(\frac{\tau}{\Delta t}\right)
+		\quad \text{(samples)} \\[8pt]
+		T_w       &= \frac{1}{F_{\min}} \quad \text{(seconds)}
+		\label{eq:Tw} \\[4pt]
+		N_w       &= \operatorname{round}\!\left(\frac{T_w}{\Delta t}\right)
+		\quad \text{(samples per window)}
+	\end{align}
+	
+	\textbf{Rationale for $\tau = T/4$:}
+	For a sinusoid $x(t) = A\sin(2\pi F_{\max} t)$, a
+	quarter-period delay produces a cosine:
+	
+	\begin{equation}
+		x(t + \tau) = A\sin\!\left(2\pi F_{\max} t + \frac{\pi}{2}\right)
+		= A\cos(2\pi F_{\max} t)
+	\end{equation}
+	
+	Plotting $x(t)$ vs.\ $x(t+\tau)$ traces a perfect circle,
+	maximising the 2-D spread of the point cloud and giving
+	the best-conditioned ellipse fit.
+	Any other delay angle produces an ellipse, but $\tau = T/4$
+	is the unique delay that makes the two embedded dimensions
+	statistically independent for a sinusoid.
+	
+	% ============================================================
+	\section{Zero-Padding}
+	% ============================================================
+	
+	\textbf{Goal:} Ensure the sliding window is valid from sample
+	index $i=0$ without accessing samples that do not exist
+	in the original signal.
+	Prepending $N_{\text{pad}}$ zeros to the signal
+	before the main loop begins.
+	
+	The earliest sample accessed by the window at position $i=0$
+	is at conceptual index:
+	
+	\begin{equation}
+		\ell = -(N_w - 1) - \tau_s < 0
+	\end{equation}
+	
+	Since $\ell < 0$, samples before the signal start are required.
+	The required number of prepended zeros is:
+	
+	\begin{equation}
+		N_{\text{pad}} = |\ell| = N_w - 1 + \tau_s
+	\end{equation}
+	
+	The zero-padded signal is defined as:
+	
+	\begin{equation}
+		x_{\text{pad}}(n) =
+		\begin{cases}
+			0                  & n = 0, \ldots, N_{\text{pad}}-1
+			\quad \text{(prepended zeros)} \\
+			x(n - N_{\text{pad}}) & n = N_{\text{pad}}, \ldots,
+			N_{\text{pad}}+N-1
+			\quad \text{(original signal)}
+		\end{cases}
+	\end{equation}
+	
+	% ============================================================
+	\section{Takens Delay Embedding}
+	% ============================================================
+	
+	\textbf{Goal:} Convert the 1-D signal within each window
+	into a 2-D point cloud that traces an ellipse in phase space.
+    Pairing each sample with a delayed copy of itself,
+	separated by $\tau_s$ samples.
+	For a periodic signal this produces a closed elliptical loop;
+	deviations from the loop reveal dynamic changes.
+	
+	For window starting at sample index $i$, the two-dimensional
+	point cloud $\mathbf{P}$ is constructed as:
+	
+	\begin{equation}
+		\mathbf{P} =
+		\begin{bmatrix}
+			x(i)                  & x(i + \tau_s) \\
+			x(i+1)                & x(i+\tau_s+1) \\
+			\vdots                & \vdots \\
+			x(i+N_w-\tau_s-1)    & x(i+N_w-1)
+		\end{bmatrix}
+		\in \mathbb{R}^{(N_w - \tau_s) \times 2}
+	\end{equation}
+	
+	Each row $k$ is a 2-D point in the reconstructed phase space:
+	
+	\begin{equation}
+		\mathbf{p}_k = \bigl(x(i+k-1),\; x(i+k-1+\tau_s)\bigr),
+		\qquad k = 1, \ldots, N_w - \tau_s
+	\end{equation}
+	
+	Let $n = N_w - \tau_s$ denote the number of points per window.
+	
+	% ============================================================
+	\section{General Conic Equation and Ellipse Constraint}
+	% ============================================================
+	
+	\textbf{Goal:} Define the mathematical form of the curve we
+	are fitting (an ellipse), and establish the algebraic
+	constraint that guarantees the fitted curve is always
+	an ellipse --- never a hyperbola or parabola.
+    Useing the general degree-2 implicit equation and
+	apply the Fitzgibbon constraint $4ac - b^2 = 1$.
+	
+	\subsection{General Conic}
+	
+	Any conic section in $\mathbb{R}^2$ satisfies the implicit equation:
+	
+	\begin{equation}
+		\boxed{F(x,y) = ax^2 + bxy + cy^2 + dx + ey + f = 0}
+		\label{eq:conic}
+	\end{equation}
+	
+	with coefficient vector $\mathbf{a} = [a,\, b,\, c,\, d,\, e,\, f]^\top$.
+	The coefficients $a$, $b$, $c$ control shape and tilt;
+	$d$, $e$, $f$ control position and offset.
+	
+	\subsection{Ellipse Discriminant Condition}
+	
+	The conic type is determined by the discriminant $\Delta = b^2 - 4ac$:
+	
+	\begin{equation}
+		\Delta =
+		\begin{cases}
+			< 0 & \Rightarrow \text{ellipse} \\
+			= 0 & \Rightarrow \text{parabola} \\
+			> 0 & \Rightarrow \text{hyperbola}
+		\end{cases}
+	\end{equation}
+	
+	Without a constraint, an unconstrained fit might return
+	a hyperbola or parabola that also passes through the data.
+	We must explicitly enforce $\Delta < 0$.
+	
+	\subsection{Fitzgibbon Algebraic Constraint}
+	
+	To guarantee an ellipse solution, Fitzgibbon et al.\ enforce:
+	
+	\begin{equation}
+		\mathbf{a}^\top \mathbf{C}\, \mathbf{a} = 1,
+		\qquad \text{where} \quad
+		4ac - b^2 = 1
+		\label{eq:constraint}
+	\end{equation}
+	
+	This simultaneously fixes the scale ambiguity of $\mathbf{a}$
+	(since any scalar multiple gives the same curve) and guarantees
+	the discriminant condition $\Delta < 0$.
+	The full $6 \times 6$ constraint matrix $\mathbf{C}$ is
+	constructed so that $\mathbf{a}^\top\mathbf{C}\mathbf{a}$
+	evaluates exactly to $4ac - b^2$:
+	
+	\begin{equation}
+		\mathbf{C} =
+		\begin{bmatrix}
+			0 & 0 & 2 & 0 & 0 & 0 \\
+			0 &-1 & 0 & 0 & 0 & 0 \\
+			2 & 0 & 0 & 0 & 0 & 0 \\
+			0 & 0 & 0 & 0 & 0 & 0 \\
+			0 & 0 & 0 & 0 & 0 & 0 \\
+			0 & 0 & 0 & 0 & 0 & 0
+		\end{bmatrix}
+	\end{equation}
+	
+	The lower $3\times3$ block is zero because $d$, $e$, $f$
+	do not appear in the discriminant condition.
+	
+	% ============================================================
+	\section{Design Matrix and Scatter Matrix}
+	% ============================================================
+	
+	\textbf{Goal:} Organise all $n$ data points into a compact
+	matrix form that the optimisation algorithm can work with.
+	. Each point $(x_k, y_k)$ contributes one row
+	to the design matrix $\mathbf{D}$ by evaluating the six
+	conic monomials.
+	Multiplying $\mathbf{D}^\top\mathbf{D}$ accumulates
+	information from all $n$ points into the fixed-size
+	$6\times6$ scatter matrix $\mathbf{S}$.
+	
+	\subsection{Design Matrix}
+	
+	Each point $(x_k, y_k)$ contributes one row:
+	
+	\begin{equation}
+		\mathbf{d}_k = \bigl[x_k^2,\; x_k y_k,\; y_k^2,\;
+		x_k,\; y_k,\; 1\bigr]
+		\in \mathbb{R}^{1 \times 6}
+	\end{equation}
+	
+	The full design matrix stacking all $n$ points is:
+	
+	\begin{equation}
+		\mathbf{D} =
+		\begin{bmatrix}
+			x_1^2 & x_1 y_1 & y_1^2 & x_1 & y_1 & 1 \\
+			x_2^2 & x_2 y_2 & y_2^2 & x_2 & y_2 & 1 \\
+			\vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+			x_n^2 & x_n y_n & y_n^2 & x_n & y_n & 1
+		\end{bmatrix}
+		\in \mathbb{R}^{n \times 6}
+	\end{equation}
+	
+	$\mathbf{D}$ is partitioned by column type
+	(quadratic vs.\ linear monomials):
+	
+	\begin{equation}
+		\mathbf{D} = [\,\mathbf{D}_1\; |\; \mathbf{D}_2\,],
+		\qquad
+		\mathbf{D}_1 = [x^2,\, xy,\, y^2],\quad
+		\mathbf{D}_2 = [x,\, y,\, 1]
+	\end{equation}
+	
+	with corresponding coefficient partition
+	$\mathbf{a}_1 = [a,b,c]^\top$ and $\mathbf{a}_2 = [d,e,f]^\top$.
+	
+	\subsection{Scatter Matrix}
+	
+	The scatter matrix accumulates all $n$ points
+	into a $6\times6$ summary via:
+	
+	\begin{equation}
+		\mathbf{S} = \mathbf{D}^\top \mathbf{D} \in \mathbb{R}^{6\times6},
+		\qquad S_{ij} = \sum_{k=1}^{n} D_{ki}\, D_{kj}
+	\end{equation}
+	
+	Every entry is a sum over all $n$ points.
+	For example $S_{11} = \sum x_k^4$ and $S_{66} = n$.
+	No information is lost: $\mathbf{S}$ is a complete
+	statistical summary of the point cloud.
+	Partitioned into $3\times3$ blocks:
+	
+	\begin{equation}
+		\mathbf{S} =
+		\begin{bmatrix}
+			\mathbf{S}_{11} & \mathbf{S}_{12} \\
+			\mathbf{S}_{21} & \mathbf{S}_{22}
+		\end{bmatrix},
+		\qquad
+		\mathbf{S}_{21} = \mathbf{S}_{12}^\top
+	\end{equation}
+	
+	where explicitly:
+	
+	\begin{align}
+		\mathbf{S}_{11} &=
+		\begin{bmatrix}
+			\sum x^4     & \sum x^3 y   & \sum x^2 y^2 \\
+			\sum x^3 y   & \sum x^2 y^2 & \sum x y^3   \\
+			\sum x^2 y^2 & \sum x y^3   & \sum y^4
+		\end{bmatrix}, \quad
+		\mathbf{S}_{22} =
+		\begin{bmatrix}
+			\sum x^2 & \sum x y & \sum x \\
+			\sum x y & \sum y^2 & \sum y \\
+			\sum x   & \sum y   & n
+		\end{bmatrix}
+	\end{align}
+	
+	% ============================================================
+	\section{Constrained Least-Squares Problem}
+	% ============================================================
+	
+	\textbf{Goal:} Find the coefficient vector $\mathbf{a}$
+	that makes the ellipse pass as close as possible to all
+	$n$ data points while remaining a valid ellipse.
+	Minimizing the total squared algebraic distance
+	$\mathbf{a}^\top\mathbf{S}\mathbf{a}$ subject to the
+	ellipse constraint, using a Lagrange multiplier.
+	This converts the constrained optimisation into a
+	generalised eigenvalue problem.
+	
+	\subsection{Lagrangian Formulation}
+	
+	We minimise the sum of squared algebraic distances subject to
+	the ellipse constraint \eqref{eq:constraint}:
+	
+	\begin{equation}
+		\min_{\mathbf{a}}\; \mathbf{a}^\top \mathbf{S}\, \mathbf{a}
+		\quad \text{subject to} \quad
+		\mathbf{a}^\top \mathbf{C}\, \mathbf{a} = 1
+	\end{equation}
+	
+	Introducing Lagrange multiplier $\lambda$ and differentiating:
+	
+	\begin{equation}
+		\mathcal{L}(\mathbf{a}, \lambda) =
+		\mathbf{a}^\top \mathbf{S}\, \mathbf{a}
+		- \lambda\bigl(\mathbf{a}^\top \mathbf{C}\, \mathbf{a} - 1\bigr)
+	\end{equation}
+	
+	Setting $\partial \mathcal{L}/\partial \mathbf{a} = \mathbf{0}$
+	gives the \textbf{generalised eigenvalue problem}:
+	
+	\begin{equation}
+		\boxed{\mathbf{S}\, \mathbf{a} = \lambda\, \mathbf{C}\, \mathbf{a}}
+		\label{eq:geneig}
+	\end{equation}
+	
+	Pre-multiplying by $\mathbf{a}^\top$ shows that
+	$\lambda = \mathbf{a}^\top\mathbf{S}\mathbf{a}$, i.e.\ $\lambda$
+	equals the objective (fitting error).
+	The smallest $|\lambda|$ gives the best fit.
+	
+	% ============================================================
+	\section{Schur Complement Reduction ($6\times6 \to 3\times3$)}
+	% ============================================================
+	
+	\textbf{Goal:} Reduce the expensive $6\times6$ generalised
+	eigenvalue problem to a cheap $3\times3$ standard one.
+	Exploiting the block structure of $\mathbf{C}$
+	(its lower $3\times3$ block is zero) to eliminate $\mathbf{a}_2$
+	algebraically from the system, leaving only a $3\times3$
+	problem in $\mathbf{a}_1$.
+	
+	\subsection{Block System}
+	
+	Writing \eqref{eq:geneig} in block form:
+	
+	\begin{equation}
+		\begin{bmatrix}
+			\mathbf{S}_{11} & \mathbf{S}_{12} \\
+			\mathbf{S}_{21} & \mathbf{S}_{22}
+		\end{bmatrix}
+		\begin{bmatrix} \mathbf{a}_1 \\ \mathbf{a}_2 \end{bmatrix}
+		= \lambda
+		\begin{bmatrix}
+			\mathbf{C}_1 & \mathbf{0} \\
+			\mathbf{0}   & \mathbf{0}
+		\end{bmatrix}
+		\begin{bmatrix} \mathbf{a}_1 \\ \mathbf{a}_2 \end{bmatrix}
+	\end{equation}
+	
+	where $\mathbf{C}_1$ is the top-left $3\times3$ block:
+	
+	\begin{equation}
+		\mathbf{C}_1 =
+		\begin{bmatrix}
+			0 & 0 & 2 \\
+			0 &-1 & 0 \\
+			2 & 0 & 0
+		\end{bmatrix}
+	\end{equation}
+	
+	This gives two block equations:
+	
+	\begin{align}
+		\mathbf{S}_{11}\,\mathbf{a}_1 + \mathbf{S}_{12}\,\mathbf{a}_2
+		&= \lambda\, \mathbf{C}_1\,\mathbf{a}_1
+		\tag{I}\label{eq:blockI} \\[4pt]
+		\mathbf{S}_{21}\,\mathbf{a}_1 + \mathbf{S}_{22}\,\mathbf{a}_2
+		&= \mathbf{0}
+		\tag{II}\label{eq:blockII}
+	\end{align}
+	
+	\subsection{Elimination of $\mathbf{a}_2$}
+	
+	Equation (II) contains no $\lambda$ (because the lower block
+	of $\mathbf{C}$ is zero), so it can be solved directly for $\mathbf{a}_2$:
+	
+	\begin{equation}
+		\mathbf{a}_2 = -\mathbf{S}_{22}^{-1}\, \mathbf{S}_{12}^\top\, \mathbf{a}_1
+		\label{eq:backsubst}
+	\end{equation}
+	
+	This is the back-substitution formula: once $\mathbf{a}_1$
+	is known, $\mathbf{a}_2$ is completely determined.
+	
+	\subsection{Schur Complement}
+	
+	Substituting \eqref{eq:backsubst} into \eqref{eq:blockI}
+	and factoring out $\mathbf{a}_1$ yields:
+	
+	\begin{equation}
+		\boxed{\mathbf{S}^* = \mathbf{S}_{11}
+			- \mathbf{S}_{12}\,\mathbf{S}_{22}^{-1}\,\mathbf{S}_{12}^\top}
+		\label{eq:schur}
+	\end{equation}
+	
+	$\mathbf{S}^*$ is the \textbf{Schur complement}: the part of
+	the quadratic information in $\mathbf{S}_{11}$ that cannot be
+	explained by the linear terms.
+	The $6\times6$ problem reduces to a $3\times3$ generalised problem:
+	
+	\begin{equation}
+		\mathbf{S}^*\,\mathbf{a}_1 = \lambda\,\mathbf{C}_1\,\mathbf{a}_1
+	\end{equation}
+	
+	Pre-multiplying by $\mathbf{C}_1^{-1}$ converts to standard form:
+	
+	\begin{equation}
+		\underbrace{\mathbf{C}_1^{-1}\,\mathbf{S}^*}_{\mathbf{A}}\,\mathbf{a}_1
+		= \lambda\,\mathbf{a}_1
+		\label{eq:standard_eig}
+	\end{equation}
+	
+	% ============================================================
+	\section{Analytical Inverse of $\mathbf{S}_{22}$}
+	% ============================================================
+	
+	\textbf{Goal:} Compute $\mathbf{S}_{22}^{-1}$ needed for both
+	the Schur complement and the back-substitution.
+    Since $\mathbf{S}_{22}$ is always $3\times3$,
+	its inverse is computed in closed form using the cofactor method ---
+	no iterative algorithm needed.
+	A small regularisation $\varepsilon = 10^{-6}$ is added to the
+	diagonal first to prevent singularity when the data is
+	nearly collinear.
+	
+	With regularisation $\varepsilon = 10^{-6}$ added to the diagonal, let:
+	
+	\begin{equation}
+		\mathbf{S}_{22} + \varepsilon\mathbf{I} =
+		\begin{bmatrix}
+			\alpha & \beta  & \gamma \\
+			\beta  & \delta & \zeta  \\
+			\gamma & \zeta  & \eta
+		\end{bmatrix}
+	\end{equation}
+	
+	The determinant (required for all cofactor entries) is:
+	
+	\begin{equation}
+		\det = \alpha(\delta\eta - \zeta^2)
+		- \beta(\beta\eta - \zeta\gamma)
+		+ \gamma(\beta\zeta - \delta\gamma)
+	\end{equation}
+	
+	The inverse entries (exploiting symmetry $Q_{ij} = Q_{ji}$) are:
+	
+	\begin{align}
+		Q_{11} &= \phantom{-}\frac{\delta\eta - \zeta^2}{\det} &
+		Q_{12} &= -\frac{\beta\eta - \gamma\zeta}{\det} &
+		Q_{13} &= \phantom{-}\frac{\beta\zeta - \gamma\delta}{\det} \\[6pt]
+		Q_{22} &= \phantom{-}\frac{\alpha\eta - \gamma^2}{\det} &
+		Q_{23} &= -\frac{\alpha\zeta - \gamma\beta}{\det} &
+		Q_{33} &= \phantom{-}\frac{\alpha\delta - \beta^2}{\det}
+	\end{align}
+	
+	% ============================================================
+	\section{Matrix $\mathbf{A}$ and Eigenvalue Problem}
+	% ============================================================
+	
+	\textbf{Goal:} Form the $3\times3$ matrix $\mathbf{A}$ and
+	solve its eigenvalue problem to find the quadratic coefficients
+	$\mathbf{a}_1 = [a,b,c]^\top$.
+	Since $\mathbf{C}_1$ is a fixed constant matrix,
+	its inverse $\mathbf{C}_1^{-1}$ is precomputed analytically
+	and hardcoded.
+	The eigenvector with the smallest $|\lambda|$ is selected
+	because $\lambda$ equals the fitting error.
+	
+	\subsection{Computing $\mathbf{A}$}
+	
+	$\mathbf{A} = \mathbf{C}_1^{-1}\,\mathbf{S}^*$, where
+	$\mathbf{C}_1^{-1}$ is a fixed constant hardcoded in the code
+	(it never changes because $\mathbf{C}_1$ depends only on the
+	mathematical ellipse constraint, not on any data):
+	
+	\begin{equation}
+		\det(\mathbf{C}_1) = 4, \qquad
+		\mathbf{C}_1^{-1} =
+		\begin{bmatrix}
+			0   & 0   & 0.5 \\
+			0   & -1  & 0   \\
+			0.5 & 0   & 0
+		\end{bmatrix}
+	\end{equation}
+	
+	\subsection{Standard Eigenvalue Problem}
+	
+	The $3\times3$ standard eigenvalue problem is solved:
+	
+	\begin{equation}
+		\mathbf{A}\,\mathbf{a}_1 = \lambda\,\mathbf{a}_1
+	\end{equation}
+	
+	yielding eigenvalue-eigenvector pairs
+	$\{(\lambda_1, \mathbf{v}_1),(\lambda_2, \mathbf{v}_2),
+	(\lambda_3, \mathbf{v}_3)\}$.
+	The optimal quadratic coefficients are the eigenvector
+	with the smallest absolute eigenvalue (smallest fitting error):
+	
+	\begin{equation}
+		\mathbf{a}_1 = \mathbf{v}_{k^*}, \qquad
+		k^* = \operatorname*{arg\,min}_{k}\, |\lambda_k|
+	\end{equation}
+	
+	% ============================================================
+	\section{Back-Substitution for Linear Coefficients}
+	% ============================================================
+	
+	\textbf{Goal:} Recover the linear coefficients $[d,e,f]^\top$
+	from the quadratic ones $[a,b,c]^\top$.
+	Substituting $\mathbf{a}_1$ into the exact
+	algebraic formula \eqref{eq:backsubst} derived in
+	Section~6.2.
+	This is not an approximation --- it is the unique
+	linear-coefficient vector that minimises the fitting error
+	given $\mathbf{a}_1$.
+	
+	Once $\mathbf{a}_1 = [a, b, c]^\top$ is known, the linear
+	coefficients $\mathbf{a}_2 = [d, e, f]^\top$ follow exactly:
+	
+	\begin{equation}
+		\mathbf{a}_2 = -\mathbf{S}_{22}^{-1}\,\mathbf{S}_{12}^\top\,\mathbf{a}_1
+	\end{equation}
+	
+	The full six-parameter vector is assembled as:
+	
+	\begin{equation}
+		\mathbf{a} =
+		\begin{bmatrix} \mathbf{a}_1 \\ \mathbf{a}_2 \end{bmatrix}
+		= [a,\; b,\; c,\; d,\; e,\; f]^\top
+	\end{equation}
+	
+	% ============================================================
+	\section{Fitzgibbon Normalisation}
+	% ============================================================
+	
+	\textbf{Goal:} Fix the scale ambiguity of the eigenvector
+	(which is only defined up to a scalar multiple) so that
+	coefficients from different windows are comparable.
+	Dividing $\mathbf{a}$ by $\sqrt{|4ac - b^2|}$,
+	which forces the Fitzgibbon constraint to equal exactly 1.
+	This does not change the ellipse shape --- only its
+	numerical scale.
+	
+	The normalisation scale factor is:
+	
+	\begin{equation}
+		\sigma = \sqrt{\bigl|\,\mathbf{a}^\top\mathbf{C}\,\mathbf{a}\,\bigr|}
+		= \sqrt{|4ac - b^2|}
+	\end{equation}
+	
+	\begin{equation}
+		\mathbf{a}_{\text{norm}} = \frac{\mathbf{a}}{\sigma}
+	\end{equation}
+	
+	\textbf{Verification} --- the constraint is satisfied after normalisation:
+	
+	\begin{equation}
+		\mathbf{a}_{\text{norm}}^\top\,\mathbf{C}\,\mathbf{a}_{\text{norm}}
+		= \frac{1}{\sigma^2}\,\mathbf{a}^\top\mathbf{C}\,\mathbf{a}
+		= \frac{4ac - b^2}{|4ac - b^2|}
+		= 1 \quad \checkmark
+	\end{equation}
+	
+	% ============================================================
+	\section{Conic to Parametric Conversion}
+	% ============================================================
+	
+	\textbf{Goal:} Convert the six algebraic coefficients
+	$[a,b,c,d,e,f]$ into human-interpretable geometric parameters:
+	ellipse centre $(x_0, y_0)$, semi-axes $(r_1, r_2)$,
+	and tilt angle $\theta$.
+	Working through five sub-steps --- find the
+	critical point of $F$ (centre), evaluate $F$ there,
+	diagonalise the quadratic part (angle), compute the
+	eigenvalues of the quadratic form (axis scaling),
+	and extract the semi-axes.
+	
+	\subsection{Step 1: Ellipse Centre}
+	
+	The centre is the unique point where both partial derivatives
+	of $F(x,y)$ vanish simultaneously
+	($\partial F/\partial x = \partial F/\partial y = 0$),
+	solved by Cramer's rule with denominator $\Delta = b^2 - 4ac < 0$:
+	
+	\begin{equation}
+		\begin{bmatrix} 2a & b \\ b & 2c \end{bmatrix}
+		\begin{bmatrix} x_0 \\ y_0 \end{bmatrix}
+		=
+		\begin{bmatrix} -d \\ -e \end{bmatrix}
+		\;\implies\;
+		x_0 = \frac{2cd - be}{b^2 - 4ac}, \qquad
+		y_0 = \frac{2ae - bd}{b^2 - 4ac}
+		\label{eq:centre}
+	\end{equation}
+	
+	\subsection{Step 2: Value at Centre}
+	
+	Evaluating $F$ at the centre gives the scalar $a'$,
+	which acts as a normalisation constant for the semi-axes.
+	For a valid (non-degenerate) ellipse, $a' < 0$:
+	
+	\begin{equation}
+		a' = ax_0^2 + bx_0 y_0 + cy_0^2 + dx_0 + ey_0 + f
+		\label{eq:aprime}
+	\end{equation}
+	
+	\subsection{Step 3: Tilt Angle}
+	
+	The tilt angle $\theta$ is the rotation that eliminates the
+	cross-term $bxy$ by diagonalising the $2\times2$ quadratic
+	form matrix $\mathbf{Q} =
+	\bigl[\begin{smallmatrix}a&b/2\\b/2&c\end{smallmatrix}\bigr]$:
+	
+	\begin{equation}
+		\tan(2\theta) = \frac{b}{a - c}
+		\;\implies\;
+		\theta =
+		\begin{cases}
+			0       & \text{if } b \approx 0
+			\;\text{(already axis-aligned)}\\
+			\pi/4   & \text{if } a \approx c
+			\;\text{(isotropic quadratic part)}\\
+			\dfrac{1}{2}\arctan\!\left(\dfrac{b}{a-c}\right)
+			& \text{otherwise}
+		\end{cases}
+		\label{eq:angle}
+	\end{equation}
+	
+	\subsection{Step 4: Eigenvalues of the Quadratic Form}
+	
+	The eigenvalues of $\mathbf{Q}$ determine the curvature of
+	the ellipse in each axis direction.
+	They are found from the characteristic equation of the
+	$2\times2$ matrix $\mathbf{Q}$:
+	
+	\begin{equation}
+		\lambda_{1,2} = \frac{(a + c) \pm \sqrt{(a-c)^2 + b^2}}{2}
+		\label{eq:lambdas}
+	\end{equation}
+	
+	\subsection{Step 5: Semi-Axes}
+	
+	After translating to the centre and rotating by $\theta$,
+	the conic reduces to the canonical form
+	$\lambda_1 u^2 + \lambda_2 v^2 = -a'$.
+	Comparing with the standard ellipse form
+	$u^2/r_1^2 + v^2/r_2^2 = 1$ gives the semi-axes:
+	
+	\begin{equation}
+		r_1 = \sqrt{\frac{-a'}{\lambda_1}}, \qquad
+		r_2 = \sqrt{\frac{-a'}{\lambda_2}}
+		\label{eq:semiaxes}
+	\end{equation}
+	
+	with $r_{\text{major}} = \max(r_1, r_2)$ and
+	$r_{\text{minor}} = \min(r_1, r_2)$.
+	
+	\subsection{Parametric Form}
+	
+	The complete fitted ellipse in the original coordinate system:
+	
+	\begin{equation}
+		\begin{bmatrix} x(t) \\ y(t) \end{bmatrix}
+		=
+		\begin{bmatrix} x_0 \\ y_0 \end{bmatrix}
+		+
+		\begin{bmatrix}
+			\cos\theta & -\sin\theta \\
+			\sin\theta &  \cos\theta
+		\end{bmatrix}
+		\begin{bmatrix} r_1 \cos t \\ r_2 \sin t \end{bmatrix},
+		\qquad t \in [0,\, 2\pi)
+	\end{equation}
+	
+%	% ============================================================
+%	\section{Impact Onset Detection}
+%	% ============================================================
+%	
+%	\textbf{Goal:} Automatically detect the exact time when the
+%	impact begins in the raw signal.
+%	\textbf{How:} Find the peak of the signal, then walk backward
+%	in time until the signal last fell below the 2-sigma baseline
+%	threshold.
+%	This backward-search approach gives the true onset with
+%	zero forward-window lag.
+%	
+%	\subsection{Stable Baseline Statistics}
+%	
+%	A stable pre-impact region is used as the reference.
+%	Its mean and standard deviation are:
+%	
+%	\begin{equation}
+%		\mu_{\text{bl}} = \frac{1}{N_{\text{bl}}}
+%		\sum_{k \in \mathcal{B}} x(k),
+%		\qquad
+%		\sigma_{\text{bl}} = \sqrt{\frac{1}{N_{\text{bl}}}
+%			\sum_{k \in \mathcal{B}} \bigl(x(k) - \mu_{\text{bl}}\bigr)^2}
+%	\end{equation}
+%	
+%	\subsection{Backward Search for Onset}
+%	
+%	Let $k^* = \arg\max_k |x(k)|$ be the impact peak index.
+%	Walking backward from $k^*$, the onset index $k_0$ is the
+%	last sample before the peak where the signal was
+%	still within the baseline level:
+%	
+%	\begin{equation}
+%		k_0 = \max\bigl\{k \leq k^* :
+%		|x(k) - \mu_{\text{bl}}| < 2\sigma_{\text{bl}}\bigr\} + 1
+%	\end{equation}
+%	
+%	The impact onset time is $t_{\text{impact}} = k_0 \cdot \Delta t$.
+%	
+%	% ============================================================
+%	\section{Change Point Detection for Parameter $a$}
+%	% ============================================================
+%	
+%	\textbf{Goal:} Detect all times when the ellipse coefficient
+%	$a$ (blue curve) changes significantly from its pre-impact
+%	baseline, marking each as a dashed vertical line in the plots.
+%	\textbf{How:} Compute the stable baseline statistics of $a$
+%	from the 0.5--3.0\,s window, flag all windows where $a$
+%	deviates by more than $3\sigma$, and group nearby detections
+%	separated by at least 0.3\,s.
+%	
+%	\subsection{Stable Baseline of Parameter $a$}
+%	
+%	Using the stable time window $t \in [0.5\,\text{s},\, 3.0\,\text{s}]$
+%	(which excludes the startup transient and the impact region):
+%	
+%	\begin{equation}
+%		\bar{a}_{\text{bl}} = \frac{1}{|\mathcal{S}|}
+%		\sum_{i \in \mathcal{S}} a_i, \qquad
+%		\sigma_{a}^{\text{bl}} = \sqrt{\frac{1}{|\mathcal{S}|}
+%			\sum_{i \in \mathcal{S}} (a_i - \bar{a}_{\text{bl}})^2}
+%	\end{equation}
+%	
+%	\subsection{Three-Sigma Change Detection}
+%	
+%	A statistically significant change is declared at window $i$
+%	when $a_i$ deviates more than 3 standard deviations from
+%	the baseline (probability $<0.3\%$ for Gaussian noise):
+%	
+%	\begin{equation}
+%		|a_i - \bar{a}_{\text{bl}}| > 3\,\sigma_{a}^{\text{bl}}
+%	\end{equation}
+%	
+%	The first sample of each new group of consecutive detections
+%	(a rising edge in the binary detection signal) is recorded
+%	as a change point, with groups separated by at least
+%	$\Delta t_{\min} = 0.3$\,s.
+	
+	% ============================================================
+	\section{Min-Max Normalisation for Stacked Visualisation}
+	% ============================================================
+	
+	\textbf{Goal:} Display all five ellipse parameters
+	($a$, $b$, $c$, $d$, $e$) on the same plot with equal
+	visual amplitude so they can be compared directly.
+	Normalising the Min-max of each parameter to $[0,1]$
+	independently, then add a fixed vertical offset to
+	separate the five bands.
+	This guarantees equal band height regardless of the
+	raw magnitude of each parameter.
+	
+	For each parameter $j \in \{1,\ldots,5\}$:
+	
+	\begin{equation}
+		v_{\text{norm},i}^{(j)}
+		= \frac{v_i^{(j)} - \min_i v_i^{(j)}}
+		{\max_i v_i^{(j)} - \min_i v_i^{(j)}}
+		\in [0,\, 1]
+	\end{equation}
+	
+	The stacked (offset) display value is:
+	
+	\begin{equation}
+		\tilde{v}_i^{(j)} = v_{\text{norm},i}^{(j)} + \delta_j, \qquad
+		\delta_j = (5 - j) \times \Delta_{\text{sep}}
+	\end{equation}
+	
+	where $\Delta_{\text{sep}} = 1.15$ is the vertical separation,
+	placing parameter $a$ ($j=1$) at the top (offset $= 4\times1.15$)
+	and $e$ ($j=5$) at the bottom (offset $= 0$).
+	Y-axis tick labels are placed at the centre of each band:
+	
+	\begin{equation}
+		y_{\text{tick}}^{(j)} = \delta_j + 0.5
+	\end{equation}
+	
+\end{document}

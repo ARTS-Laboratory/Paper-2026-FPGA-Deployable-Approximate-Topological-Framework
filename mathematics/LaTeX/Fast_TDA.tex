@@ -12,9 +12,9 @@
 	\tableofcontents
 	\newpage
 	
-	% ============================================================
+
 	\section{Spectral Analysis and TDA Parameter Selection}
-	% ============================================================
+
 	
 	\textbf{Goal:} Extract two key frequencies from the signal ---
 	$F_{\max}$ (dominant oscillation) and $F_{\min}$ (lowest
@@ -113,9 +113,9 @@
 	is the unique delay that makes the two embedded dimensions
 	statistically independent for a sinusoid.
 	
-	% ============================================================
+
 	\section{Zero-Padding}
-	% ============================================================
+	
 	
 	\textbf{Goal:} Ensure the sliding window is valid from sample
 	index $i=0$ without accessing samples that do not exist
@@ -150,9 +150,9 @@
 		\end{cases}
 	\end{equation}
 	
-	% ============================================================
+
 	\section{Takens Delay Embedding}
-	% ============================================================
+	
 	
 	\textbf{Goal:} Convert the 1-D signal within each window
 	into a 2-D point cloud that traces an ellipse in phase space.
@@ -184,9 +184,9 @@
 	
 	Let $n = N_w - \tau_s$ denote the number of points per window.
 	
-	% ============================================================
+	
 	\section{General Conic Equation and Ellipse Constraint}
-	% ============================================================
+	
 	
 	\textbf{Goal:} Define the mathematical form of the curve we
 	are fitting (an ellipse), and establish the algebraic
@@ -258,9 +258,9 @@
 	The lower $3\times3$ block is zero because $d$, $e$, $f$
 	do not appear in the discriminant condition.
 	
-	% ============================================================
+	
 	\section{Design Matrix and Scatter Matrix}
-	% ============================================================
+	
 	
 	\textbf{Goal:} Organise all $n$ data points into a compact
 	matrix form that the optimisation algorithm can work with.
@@ -350,9 +350,9 @@
 		\end{bmatrix}
 	\end{align}
 	
-	% ============================================================
+	
 	\section{Constrained Least-Squares Problem}
-	% ============================================================
+
 	
 	\textbf{Goal:} Find the coefficient vector $\mathbf{a}$
 	that makes the ellipse pass as close as possible to all
@@ -395,9 +395,9 @@
 	equals the objective (fitting error).
 	The smallest $|\lambda|$ gives the best fit.
 	
-	% ============================================================
+
 	\section{Schur Complement Reduction ($6\times6 \to 3\times3$)}
-	% ============================================================
+	
 	
 	\textbf{Goal:} Reduce the expensive $6\times6$ generalised
 	eigenvalue problem to a cheap $3\times3$ standard one.
@@ -487,9 +487,9 @@
 		\label{eq:standard_eig}
 	\end{equation}
 	
-	% ============================================================
+
 	\section{Analytical Inverse of $\mathbf{S}_{22}$}
-	% ============================================================
+
 	
 	\textbf{Goal:} Compute $\mathbf{S}_{22}^{-1}$ needed for both
 	the Schur complement and the back-substitution.
@@ -530,9 +530,9 @@
 		Q_{33} &= \phantom{-}\frac{\alpha\delta - \beta^2}{\det}
 	\end{align}
 	
-	% ============================================================
+
 	\section{Matrix $\mathbf{A}$ and Eigenvalue Problem}
-	% ============================================================
+	
 	
 	\textbf{Goal:} Form the $3\times3$ matrix $\mathbf{A}$ and
 	solve its eigenvalue problem to find the quadratic coefficients
@@ -579,9 +579,9 @@
 		k^* = \operatorname*{arg\,min}_{k}\, |\lambda_k|
 	\end{equation}
 	
-	% ============================================================
+
 	\section{Back-Substitution for Linear Coefficients}
-	% ============================================================
+	
 	
 	\textbf{Goal:} Recover the linear coefficients $[d,e,f]^\top$
 	from the quadratic ones $[a,b,c]^\top$.
@@ -607,9 +607,9 @@
 		= [a,\; b,\; c,\; d,\; e,\; f]^\top
 	\end{equation}
 	
-	% ============================================================
+
 	\section{Fitzgibbon Normalisation}
-	% ============================================================
+
 	
 	\textbf{Goal:} Fix the scale ambiguity of the eigenvector
 	(which is only defined up to a scalar multiple) so that
@@ -639,9 +639,9 @@
 		= 1 \quad \checkmark
 	\end{equation}
 	
-	% ============================================================
+	
 	\section{Conic to Parametric Conversion}
-	% ============================================================
+
 	
 	\textbf{Goal:} Convert the six algebraic coefficients
 	$[a,b,c,d,e,f]$ into human-interpretable geometric parameters:
@@ -750,9 +750,9 @@
 		\qquad t \in [0,\, 2\pi)
 	\end{equation}
 	
-%	% ============================================================
+%
 %	\section{Impact Onset Detection}
-%	% ============================================================
+%	
 %	
 %	\textbf{Goal:} Automatically detect the exact time when the
 %	impact begins in the raw signal.
@@ -789,9 +789,9 @@
 %	
 %	The impact onset time is $t_{\text{impact}} = k_0 \cdot \Delta t$.
 %	
-%	% ============================================================
+%
 %	\section{Change Point Detection for Parameter $a$}
-%	% ============================================================
+%	
 %	
 %	\textbf{Goal:} Detect all times when the ellipse coefficient
 %	$a$ (blue curve) changes significantly from its pre-impact
@@ -828,9 +828,9 @@
 %	as a change point, with groups separated by at least
 %	$\Delta t_{\min} = 0.3$\,s.
 	
-	% ============================================================
+
 	\section{Min-Max Normalisation for Stacked Visualisation}
-	% ============================================================
+
 	
 	\textbf{Goal:} Display all five ellipse parameters
 	($a$, $b$, $c$, $d$, $e$) on the same plot with equal

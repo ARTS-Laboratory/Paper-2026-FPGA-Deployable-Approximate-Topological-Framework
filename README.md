@@ -12,8 +12,7 @@ This repo includes three main folders:
 
 
 Reference paper 
-* Fitzgibbon, Andrew, Maurizio Pilu, and Robert B. Fisher. "Direct least square fitting of ellipses." IEEE Transactions on pattern analysis and machine intelligence 21.5 (2002): 476-480.
-* https://ieeexplore.ieee.org/document/765658
+* Fitzgibbon, Andrew, Maurizio Pilu, and Robert B. Fisher. "Direct least square fitting of ellipses." IEEE Transactions on pattern analysis and machine intelligence 21.5 (2002): 476-480. https://ieeexplore.ieee.org/document/765658
 
 
 ## Licensing and Citation

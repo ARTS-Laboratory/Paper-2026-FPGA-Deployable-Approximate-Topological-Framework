@@ -2,7 +2,7 @@
 Repository for the 2026 SMASIS paper "FPGA-deployable Approximate Topological Framework for Low-latency Change-point Detection in PCB Shock and Vibration Response."
 This repo includes three main folders:
 
-1- HLS: includes the main code for the FPGA.
+1- HLS: includes the design code for the FPGA.
 
 2- code: includes the MATLAB code for the Fast-TDA algorithm, data, and a video clip of the ellipse fitting process over time.
 

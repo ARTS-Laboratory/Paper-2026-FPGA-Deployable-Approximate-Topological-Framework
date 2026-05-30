@@ -8,7 +8,7 @@ This repo includes three main folders:
 
 3- Mathematics: includes the mathematical derivation of the Fast TDA in detail.
 
-4- media: includes the GitHub address related to this paper.
+4- media: includes the QR code for the GitHub address related to this paper.
 
 
 Reference paper 

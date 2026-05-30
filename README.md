@@ -6,7 +6,7 @@ This repo includes three main folders:
 
 2- code: includes the MATLAB code for the Fast-TDA algorithm, along with the video clip of the ellipse fitting process over time.
 
-3- Mathematics: includes the mathematical derivation of the Fast TDA in detail.
+3- Mathematics: includes the mathematical derivation of the Fast TDA in detail ( the last updated file name is Fast_TDA.tex)
 
 4- media: includes the GitHub address related to this paper.
 

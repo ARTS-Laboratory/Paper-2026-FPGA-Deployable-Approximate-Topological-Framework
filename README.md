@@ -6,7 +6,7 @@ This repo includes three main folders:
 
 2- code: includes the MATLAB code for the Fast-TDA algorithm, along with the video clip of the ellipse fitting process over time.
 
-3- Mathematics: includes the mathematical derivation of the Fast TDA in detail.
+3- Mathematics: includes the mathematical derivation of the Fast TDA in detail ( the last updated file name is Fast_TDA.tex)
 
 4- media: includes the GitHub address related to this paper.
 
@@ -25,10 +25,11 @@ This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 Intern
 
 Cite this as: 
 
-@Misc{ARTSLabPaper2026Fpga,    
-  author = {Mohsen Gol Zardian, Charlton Rolle, Trotter Roberts, Joud N. Satme, Arman Razmarashooli, Austin R. J. Downey, Jason D. Bakos, Simon Laflamme, Gurcan Comert, Negash Begashaw},  
+@Misc{Zardian2026Paper2026Fpga,    
+  author = {Mohsen Gol Zardian, Charlton Rolle, Austin R. J. Downey, Jason D. Bakos},  
   howpublished = {GitHub},  
-  title  = {FPGA-DEPLOYABLE APPROXIMATE TOPOLOGICAL FRAMEWORK FOR LOW-LATENCY CHANGE-POINT DETECTION IN PCB SHOCK AND VIBRATION RESPONSE},    
+  year = 2026,  
+  title  = {Paper 2026 {FPGA}-deployable Approximate Topological Framework},    
   groups = {ARTS-Lab},    
   url    = {https://github.com/ARTS-Laboratory/Paper-2026-FPGA-deployable-Approximate-Topological-Framework},   
 }

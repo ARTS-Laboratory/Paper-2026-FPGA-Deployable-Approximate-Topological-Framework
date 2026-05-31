@@ -2,17 +2,10 @@
 Repository for the 2026 SMASIS paper "FPGA-deployable Approximate Topological Framework for Low-latency Change-point Detection in PCB Shock and Vibration Response."
 This repo includes three main folders:
 
-1. HLS
-   High-Level Synthesis (HLS) implementation used to evaluate FPGA deployment feasibility of the proposed Fast-TDA framework. While FPGA implementation details are not the primary focus of the paper, these files were developed to verify that the algorithm can be synthesized and deployed in a hardware-accelerated environment.
-
-2. MATLAB
-   MATLAB implementation of the Fast-TDA algorithm, supporting datasets, and a video demonstrating the ellipse-fitting process over time.
-
-3. Mathematics
-   Detailed mathematical derivations and theoretical development of the Fast-TDA framework.
-
-4. Media
-   Supplemental media, including the QR code linking to this repository.
+* HLS: High-Level Synthesis (HLS) implementation used to evaluate FPGA deployment feasibility of the proposed Fast-TDA framework. While FPGA implementation details are not the primary focus of the paper, these files were developed to verify that the algorithm can be synthesized and deployed in a hardware-accelerated environment.
+* MATLAB: MATLAB implementation of the Fast-TDA algorithm, supporting datasets, and a video demonstrating the ellipse-fitting process over time.
+* Mathematics: Detailed mathematical derivations and theoretical development of the Fast-TDA framework.
+* Media: Supplemental media, including the QR code linking to this repository.
 
 
 Reference paper 

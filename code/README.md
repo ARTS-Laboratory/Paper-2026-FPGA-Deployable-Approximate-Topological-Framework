@@ -1,4 +1,4 @@
-# Folder Notes:
+# Code:
 This folder includes the main code of Fast-TDA (ellipse fitting) and the data from the PCB shock test.
 
 ## What this folder contains

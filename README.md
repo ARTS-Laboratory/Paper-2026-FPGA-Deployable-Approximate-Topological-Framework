@@ -1,19 +1,14 @@
 # Paper 2026 FPGA-deployable Approximate Topological Framework
 Repository for the 2026 SMASIS paper "FPGA-deployable Approximate Topological Framework for Low-latency Change-point Detection in PCB Shock and Vibration Response."
-This repo includes three main folders:
-
-1- HLS: includes the main code for the FPGA.
-
-2- code: includes the MATLAB code for the Fast-TDA algorithm, along with the video clip of the ellipse fitting process over time.
-
-3- Mathematics: includes the mathematical derivation of the Fast TDA in detail ( the last updated file name is Fast_TDA.tex)
-
-4- media: includes the GitHub address related to this paper.
+This repo includes three main folders: 
+* **HLS:** High-Level Synthesis (HLS) implementation used to evaluate FPGA deployment feasibility of the proposed Fast-TDA framework. 
+* **code:** MATLAB implementation of the Fast-TDA algorithm and supporting datasets.
+* **mathematics:** Detailed mathematical derivations and theoretical development of the Fast-TDA framework.
+* **media:** Supplemental media.
 
 
 Reference paper 
-* Fitzgibbon, Andrew, Maurizio Pilu, and Robert B. Fisher. "Direct least square fitting of ellipses." IEEE Transactions on pattern analysis and machine intelligence 21.5 (2002): 476-480.
-* https://ieeexplore.ieee.org/document/765658
+* Fitzgibbon, Andrew, Maurizio Pilu, and Robert B. Fisher. "Direct least square fitting of ellipses." IEEE Transactions on pattern analysis and machine intelligence 21.5 (2002): 476-480. https://ieeexplore.ieee.org/document/765658
 
 
 ## Licensing and Citation

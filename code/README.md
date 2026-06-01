@@ -1,11 +1,10 @@
-# Folder Notes:
+# Code:
 This folder includes the main code of Fast-TDA (ellipse fitting) and the data from the PCB shock test.
-The data include the excitation signal (impact), imposed by the shaker and two acquired signals from the base plate and the main PCB.
 
 ## What this folder contains
-1- data.csv: This CSV file contains the excitation as the  acceleration signals from the PCB (Output).
-
-2-This folder includes the video of the ellipse fitting during windowing, showing how the ellipse experience changes in shape and size over TDA processing. 
+* **data.csv:** This CSV file contains the excitation as the  acceleration signals from the PCB (Output).
+* **Fast_TDA.m:** This m file is the main fast TDA algorithm ( ellipse fitting ).
+* **myVideo.mp4:** This video shows the evolution of ellipse fitting during windowing, showing how the ellipse's shape and size change over TDA processing. 
 
 
 

@@ -13,68 +13,68 @@
 	\newpage
 	
 
-	\section{Spectral Analysis and TDA Parameter Selection}
-
+%	\section{Spectral Analysis and TDA Parameter Selection}
+%
+%	
+%	\textbf{Goal:} Extract two key frequencies from the signal ---
+%	$F_{\max}$ (dominant oscillation) and $F_{\min}$ (lowest
+%	significant frequency) --- which control the time delay
+%	and window size used in all subsequent steps.
+%	Transforming the signal from the time domain into
+%	the frequency domain using the DFT, then locate peaks in the
+%	resulting amplitude spectrum.
+%	
+%	\subsection{Discrete Fourier Transform}
+%	
+%	The DFT decomposes the time-domain signal $x(n)$ into its
+%	sinusoidal frequency components.
+%	Each coefficient $Y(k)$ tells us how much energy the signal
+%	has at frequency $f(k) = k \cdot F_s/N$ Hz.
+%	Given a discrete time series $x(n)$ of length $N$:
+%	
+%	\begin{equation}
+%		Y(k) = \sum_{n=0}^{N-1} x(n)\, e^{-j2\pi kn/N},
+%		\qquad k = 0, 1, \ldots, N-1
+%	\end{equation}
+%	
+%	Because the input is real-valued, the DFT is symmetric and
+%	only the first half carries unique information.
+%	Dividing by $N$ normalises the amplitude so it is independent
+%	of signal length, and doubling the interior bins preserves
+%	total energy in the single-sided representation:
+%	
+%	\begin{equation}
+%		|Y_{\text{single}}(k)| =
+%		\begin{cases}
+%			\dfrac{|Y(k)|}{N}    & k = 0 \text{ (DC)} \\[6pt]
+%			\dfrac{2\,|Y(k)|}{N} & k = 1, \ldots, \lfloor N/2 \rfloor - 1 \\[6pt]
+%			\dfrac{|Y(k)|}{N}    & k = N/2 \text{ (Nyquist, even } N \text{ only)}
+%		\end{cases}
+%	\end{equation}
+%	
+%	The corresponding frequency axis (Hz) is:
+%	
+%	\begin{equation}
+%		f(k) = k \cdot \frac{F_s}{N},
+%		\qquad k = 0, 1, \ldots, \lfloor N/2 \rfloor
+%	\end{equation}
+%	
+%	where $F_s = 1/\Delta t$ is the sampling frequency.
+%	
+%	\subsection{Peak Frequency Detection}
+%	
+%	Two characteristic frequencies are extracted from the spectrum.
+%	$F_{\max}$ is the dominant oscillation frequency.
+%	$F_{\min}$ is the lowest frequency with a peak prominence above
+%	10\% of the maximum magnitude, ensuring noise bumps are ignored:
+%	
+%	\begin{align}
+%		F_{\max} &= \text{frequency at absolute spectral peak} \\[4pt]
+%		F_{\min} &= \text{lowest peak with prominence} > 10\%
+%		\text{ of } \max|Y_{\text{single}}|
+%	\end{align}
 	
-	\textbf{Goal:} Extract two key frequencies from the signal ---
-	$F_{\max}$ (dominant oscillation) and $F_{\min}$ (lowest
-	significant frequency) --- which control the time delay
-	and window size used in all subsequent steps.
-	Transforming the signal from the time domain into
-	the frequency domain using the DFT, then locate peaks in the
-	resulting amplitude spectrum.
-	
-	\subsection{Discrete Fourier Transform}
-	
-	The DFT decomposes the time-domain signal $x(n)$ into its
-	sinusoidal frequency components.
-	Each coefficient $Y(k)$ tells us how much energy the signal
-	has at frequency $f(k) = k \cdot F_s/N$ Hz.
-	Given a discrete time series $x(n)$ of length $N$:
-	
-	\begin{equation}
-		Y(k) = \sum_{n=0}^{N-1} x(n)\, e^{-j2\pi kn/N},
-		\qquad k = 0, 1, \ldots, N-1
-	\end{equation}
-	
-	Because the input is real-valued, the DFT is symmetric and
-	only the first half carries unique information.
-	Dividing by $N$ normalises the amplitude so it is independent
-	of signal length, and doubling the interior bins preserves
-	total energy in the single-sided representation:
-	
-	\begin{equation}
-		|Y_{\text{single}}(k)| =
-		\begin{cases}
-			\dfrac{|Y(k)|}{N}    & k = 0 \text{ (DC)} \\[6pt]
-			\dfrac{2\,|Y(k)|}{N} & k = 1, \ldots, \lfloor N/2 \rfloor - 1 \\[6pt]
-			\dfrac{|Y(k)|}{N}    & k = N/2 \text{ (Nyquist, even } N \text{ only)}
-		\end{cases}
-	\end{equation}
-	
-	The corresponding frequency axis (Hz) is:
-	
-	\begin{equation}
-		f(k) = k \cdot \frac{F_s}{N},
-		\qquad k = 0, 1, \ldots, \lfloor N/2 \rfloor
-	\end{equation}
-	
-	where $F_s = 1/\Delta t$ is the sampling frequency.
-	
-	\subsection{Peak Frequency Detection}
-	
-	Two characteristic frequencies are extracted from the spectrum.
-	$F_{\max}$ is the dominant oscillation frequency.
-	$F_{\min}$ is the lowest frequency with a peak prominence above
-	10\% of the maximum magnitude, ensuring noise bumps are ignored:
-	
-	\begin{align}
-		F_{\max} &= \text{frequency at absolute spectral peak} \\[4pt]
-		F_{\min} &= \text{lowest peak with prominence} > 10\%
-		\text{ of } \max|Y_{\text{single}}|
-	\end{align}
-	
-	\subsection{TDA Time Delay and Window Duration}
+	\section{TDA Time Delay and Window Duration}
 	
 	\textbf{Goal:} Translate $F_{\max}$ and $F_{\min}$ into
 	the two control parameters of the Takens embedding:
